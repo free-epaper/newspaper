@@ -1,0 +1,112 @@
+<section class="intro-section">
+  <div fxLayout="row" fxLayout.xs="column" fxFlexFill fxLayoutAlign="center center">
+    <div class="example-container">
+      <mat-tab-group (selectedTabChange)="tabClick($event)">
+        <mat-tab label="हिन्दुस्तान">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>हिन्दुस्तान ई-पेपर
+              </mat-card-title>
+              <mat-card-subtitle>डाउनलोड करने/ पढ़ने के लिए संस्करण और दिनांक चुनें</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content style="text-align: center;">
+              <form [formGroup]="newspaperForm">
+                <mat-form-field appearance="fill">
+                  <mat-label>दिनांक चुनें</mat-label>
+                  <input matInput [matDatepicker]="picker" (focus)="picker.open()" [min]="minDate" [max]="maxDate"
+                    [matDatepickerFilter]="DateFilterFn" formControlName="date" placeholder="DD/MM/YYYY">
+                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                  <mat-error *ngIf="newspaperForm.value.date < minDate || newspaperForm.value.date > maxDate">दो महीने
+                    के भीतर की एक तारीख चुनें</mat-error>
+                </mat-form-field>
+                <br>
+                <br>
+                <mat-form-field appearance="fill">
+                  <mat-label>संस्करण</mat-label>
+                  <mat-select formControlName="edition">
+                    <mat-option value="KOS-BHG"> सहरसा </mat-option>
+                    <mat-option value="NG1R-DEL"> दिल्ली </mat-option>
+                    <mat-option value="NGR-PAT"> पटना </mat-option>
+                    <mat-option value="NGR-RAN"> रांची </mat-option>
+                    <mat-option value="PRN-BHG"> पूर्णिया </mat-option>
+                    <mat-option value="KTR-BHG"> कटिहार </mat-option>
+                    <mat-option value="DRB-MUZ"> दरभंगा </mat-option>
+                    <mat-option value="MDB-MUZ"> मधुबनी </mat-option>
+                    <mat-option value="MRT-MRT"> मेरठ </mat-option>
+                    <mat-option value="MZN-MRT"> मुज़फ्फरनगर </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <br>
+              </form>
+              <button mat-raised-button color="basic" (click)="read()" [disabled]="newspaperForm.invalid">पढ़ें</button>
+              &nbsp; &nbsp;
+              <button mat-raised-button color="primary" (click)="download()"
+                [disabled]="newspaperForm.invalid">डाउनलोड</button>
+            </mat-card-content>
+          </mat-card>
+
+        </mat-tab>
+        <mat-tab label="Hindustan Times">
+
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Hindustan Times E-Paper</mat-card-title>
+              <mat-card-subtitle>Choose Edition and Date to download/read</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content style="text-align: center;">
+              <form [formGroup]="newspaperForm">
+                <mat-form-field appearance="fill">
+                  <mat-label>Choose a date</mat-label>
+                  <input matInput [matDatepicker]="picker2" (focus)="picker2.open()" [min]="minDate" [max]="maxDate"
+                    [matDatepickerFilter]="DateFilterFn" formControlName="date" placeholder="DD/MM/YYYY">
+                  <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+                  <mat-datepicker #picker2></mat-datepicker>
+                  <mat-error *ngIf="newspaperForm.value.date < minDate || newspaperForm.value.date > maxDate">Choose a
+                    date
+                    within 2 months</mat-error>
+                </mat-form-field>
+                <br>
+                <br>
+                <mat-form-field appearance="fill">
+                  <mat-label>Edition</mat-label>
+                  <mat-select formControlName="edition">
+                    <mat-option value="51"> Patna </mat-option>
+                    <mat-option value="58"> Ranchi </mat-option>
+                    <mat-option value="1"> Delhi </mat-option>
+                    <mat-option value="54"> Pune </mat-option>
+                    <mat-option value="46"> Mumbai </mat-option>
+                    <mat-option value="64"> West UP </mat-option>
+                    <mat-option value="65"> Uttarakhand </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <br>
+              </form>
+              <button mat-raised-button color="basic" (click)="readHT()"
+                [disabled]="newspaperForm.invalid">Read</button>
+              &nbsp; &nbsp;
+              <button mat-raised-button color="primary" (click)="downloadHT()"
+                [disabled]="newspaperForm.invalid">Download</button>
+            </mat-card-content>
+          </mat-card>
+
+        </mat-tab>
+      </mat-tab-group>
+
+
+
+    </div>
+  </div>
+  <div *ngIf="readingMode" style="padding-left: 2%; padding-right: 2%">
+    <ngx-extended-pdf-viewer [src]="url" useBrowserLocale="true" height="100vh" [mobileFriendlyZoom]="zoom"
+      [enablePinchOnMobile]="enablePinchOnMobile"></ngx-extended-pdf-viewer>
+  </div>
+
+  <div fxLayout="row" fxLayoutAlign="center">
+    <div *ngIf="isLoading">
+      <p style="font-size: 24;">&nbsp;Loading...</p>
+      <mat-spinner></mat-spinner>
+    </div>
+  </div>
+
+</section>
