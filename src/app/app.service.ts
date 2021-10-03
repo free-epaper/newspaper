@@ -35,13 +35,15 @@ export interface DownloadResponse {
 export class AppService {
 
   constructor(private http: HttpClient) { }
+ 
 
   downloadHT(id, fullDate) {
     let date = ('0' + fullDate.getDate()).slice(-2);
     let month = ('0' + (fullDate.getMonth()+1)).slice(-2);
     let year = ''+fullDate.getFullYear();
     var dateString = ""+ date + "%2F"+ month + "%2F"+year;
-    var url = "https://epaper.hindustantimes.com/Home/downloadpdfedition_page?id="+id+"&type="+ 5 + "&Date=" + dateString;
+    //https://epaper.livehindustan.com/Home/Download?id=125&type=5&EditionId=125&Date=20/09/2021
+    var url = "https://epaper.hindustantimes.com/Home/Download?id="+id+"&type="+ 5 + "&EditionId="+id+"&Date=" + dateString;
     // console.log(url);
 
     return this.http.get(url, {headers: new HttpHeaders({'Content-Type': 'application/json; charset=utf8'})});

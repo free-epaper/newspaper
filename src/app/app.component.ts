@@ -90,13 +90,26 @@ export class AppComponent {
   }
 
   getUrl() {
+    let newEdition = {
+      'KOS-BHG': 96,
+      'NG1R-DEL': 1,
+      'NGR-PAT': 1019,
+      'NGR-RAN':1015,
+      'PRN-BHG': 97,
+      'KTR-BHG': 1033,
+      'DRB-MUZ': 91,
+      'MDB-MUZ': 88,
+      'MRT-MRT': 1022,
+      'MZN-MRT': 40
+    };
+
     let edition = this.newspaperForm.value.edition;
     var fullDate = this.newspaperForm.value.date;
     let date = ('0' + fullDate.getDate()).slice(-2);
     let month = ('0' + (fullDate.getMonth() + 1)).slice(-2);
     let year = '' + fullDate.getFullYear();
     fullDate = date + month + year;
-    let url = "https://epaper.livehindustan.com/downloadPdf.php?filepath=epaperimages/" + fullDate + "/" + fullDate + "-" + edition + ".pdf&filename=" + fullDate + "-" + edition + ".pdf";
+    let url = "https://epaper.livehindustan.com/Home/Download?id="+newEdition[edition]+"&type=5&EditionId="+newEdition[edition]+"&Date="+date+"/"+month+"/"+year;
     return url;
   }
 
@@ -159,10 +172,80 @@ export class AppComponent {
       });
   }
 
-
-
-
+  getHTUrl() {
+    let edition = this.newspaperForm.value.edition;
+    var fullDate = this.newspaperForm.value.date;
+    let date = ('0' + fullDate.getDate()).slice(-2);
+    let month = ('0' + (fullDate.getMonth() + 1)).slice(-2);
+    let year = '' + fullDate.getFullYear();
+    fullDate = date + month + year;
+    let url = "https://epaper.hindustantimes.com/Home/Download?id="+edition+"&type=5&EditionId="+edition+"&Date="+date+"/"+month+"/"+year;
+    return url;
+  }
+  
   readHT() {
+    this.readingMode = false;
+    this.isLoading = true;
+
+    this.appservie.getPDF(this.getHTUrl())
+      .subscribe(x => {
+        var check = new Blob([x], { type: "text/plain" });
+        const reader = new FileReader();
+        reader.addEventListener('loadend', (e) => {
+
+
+          // window.location.href = url;
+
+          var newBlob = new Blob([x], { type: "application/pdf" });
+
+          // IE doesn't allow using a blob object directly as link href
+          // instead it is necessary to use msSaveOrOpenBlob
+          // if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+          //   window.navigator.msSaveOrOpenBlob(newBlob);
+          //   return;
+          // }
+
+          // For other browsers: 
+          // Create a link pointing to the ObjectURL containing the blob.
+          if (newBlob.size == 0) {
+            this._snackBar.open(this.errorMessage, "OK", {
+              duration: 4000,
+            });
+            this.readingMode = false;
+            this.isLoading = false;
+            return;
+          }
+          const data = window.URL.createObjectURL(newBlob);
+
+          var link = document.createElement('a');
+          link.href = data;
+          this.url = data;
+          this.isLoading = false;
+          this.readingMode = true;
+
+
+
+        });
+        reader.readAsText(x);
+
+        // It is necessary to create a new blob object with mime-type explicitly set
+        // otherwise only Chrome works like it should
+
+      }, error=> {
+        // console.log(error);
+        this.isLoading = false;
+        this.readingMode = false;
+            this._snackBar.open(this.errorMessage, "OK", {
+              duration: 4000,
+            });
+            return;
+      });
+  }
+
+
+
+
+  readHT1() {
     this.readingMode = false;
     this.isLoading = true;
     if (this.readTries > 100) {
@@ -237,7 +320,7 @@ export class AppComponent {
     });
   }
 
-  downloadHT() {
+  downloadHT1() {
     this.readingMode = false;
     this.isLoading = true;
     if (this.downloadTries > 100) {
@@ -387,6 +470,67 @@ export class AppComponent {
             return;
       });
   }
+
+  downloadHT() {
+    var name = "HindustanTimes" + this.newspaperForm.value.edition + "-" + this.newspaperForm.value.date.getDate() + "-" + (this.newspaperForm.value.date.getMonth() + 1);
+    this.isLoading = true;
+     this.readingMode = false;
+     this.appservie.getPDF(this.getHTUrl())
+       .subscribe(x => {
+         const reader = new FileReader();
+         reader.addEventListener('loadend', (e) => {
+ 
+           // window.location.href = url;
+           this.downloadTries = 0;
+           var newBlob = new Blob([x], { type: "application/pdf" });
+ 
+           if (newBlob.size == 0) {
+             this.isLoading = false;
+             this._snackBar.open(this.errorMessage, "OK", {
+               duration: 4000,
+             });
+             return;
+           }
+           // IE doesn't allow using a blob object directly as link href
+           // instead it is necessary to use msSaveOrOpenBlob
+           if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+             window.navigator.msSaveOrOpenBlob(newBlob);
+             return;
+           }
+ 
+           // For other browsers: 
+           // Create a link pointing to the ObjectURL containing the blob.
+           const data = window.URL.createObjectURL(newBlob);
+ 
+           var link = document.createElement('a');
+           link.href = data;
+           link.download = name + ".pdf";
+           // this is necessary as link.click() does not work on the latest firefox
+           link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+ 
+           setTimeout(function () {
+             // For Firefox it is necessary to delay revoking the ObjectURL
+             window.URL.revokeObjectURL(data);
+             link.remove();
+           }, 100);
+           this._snackBar.open("DOWNLOADING...", "OK", {
+             duration: 2000,
+           });
+           this.isLoading = false;
+ 
+         });
+         reader.readAsText(x);
+ 
+       }, error=> {
+         // console.log(error);
+         this.isLoading = false;
+             this._snackBar.open(this.errorMessage, "OK", {
+               duration: 4000,
+             });
+             return;
+       });
+   }
+ 
 
 
 }
